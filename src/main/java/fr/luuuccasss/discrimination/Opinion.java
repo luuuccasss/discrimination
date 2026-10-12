@@ -1,8 +1,7 @@
 package fr.luuuccasss.discrimination;
 
-import net.minecraft.entity.passive.VillagerEntity;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.npc.villager.Villager;
 
 /** Ce qu'un villageois pense d'un joueur : son préjugé, adouci par l'habitude. */
 public final class Opinion {
@@ -16,7 +15,7 @@ public final class Opinion {
     private Opinion() {
     }
 
-    public static Prejudice prejudice(VillagerEntity villager) {
+    public static Prejudice prejudice(Villager villager) {
         Prejudiced prejudiced = (Prejudiced) villager;
         if (prejudiced.discrimination$getPrejudice() == null) {
             prejudiced.discrimination$setPrejudice(Prejudice.roll(villager.getRandom()));
@@ -24,12 +23,12 @@ public final class Opinion {
         return prejudiced.discrimination$getPrejudice();
     }
 
-    public static Prejudice.Verdict of(VillagerEntity villager, ServerPlayerEntity player) {
+    public static Prejudice.Verdict of(Villager villager, ServerPlayer player) {
         Prejudice prejudice = prejudice(villager);
-        Prejudice.Verdict verdict = prejudice.judge(SocialClass.of(player), villager.getVillagerData().type().getKey().orElse(null),
+        Prejudice.Verdict verdict = prejudice.judge(SocialClass.of(player), villager.getVillagerData().type().unwrapKey().orElse(null),
             ((Profiled) player).discrimination$getOrigin());
         if (!verdict.hostile()) return verdict;
-        int familiarity = ((Prejudiced) villager).discrimination$getFamiliarity(player.getUuid());
+        int familiarity = ((Prejudiced) villager).discrimination$getFamiliarity(player.getUUID());
         if (familiarity >= ACCEPTED_AT) return Prejudice.Verdict.NEUTRAL;
         double softened = verdict.malus() > 0 ? verdict.malus() * (1 - familiarity / (double) ACCEPTED_AT) : verdict.malus();
         boolean refuse = verdict.refuse() && familiarity < REFUSE_UNTIL;

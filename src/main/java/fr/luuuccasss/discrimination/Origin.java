@@ -1,15 +1,15 @@
 package fr.luuuccasss.discrimination;
 
 import java.util.Map;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.village.VillagerType;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.npc.villager.VillagerType;
 
 /** Le biome d'origine d'un joueur ou d'un villageois, sous forme de type de villageois (plaines, désert…). */
 public final class Origin {
-    private static final Map<RegistryKey<VillagerType>, String[]> NAMES = Map.of(
+    private static final Map<ResourceKey<VillagerType>, String[]> NAMES = Map.of(
         VillagerType.PLAINS, new String[]{"des plaines", "Plaines", "dans tes plaines"},
         VillagerType.DESERT, new String[]{"du désert", "Désert", "dans ton désert"},
         VillagerType.SNOW, new String[]{"des neiges", "Neiges", "dans tes neiges"},
@@ -21,7 +21,7 @@ public final class Origin {
     private static final String[] UNKNOWN = {"d'ailleurs", "Ailleurs", "chez toi"};
 
     /** Couleur de chaque région, pour les bérets des chauvins. */
-    private static final Map<RegistryKey<VillagerType>, Integer> COLORS = Map.of(
+    private static final Map<ResourceKey<VillagerType>, Integer> COLORS = Map.of(
         VillagerType.PLAINS, 0x3E6FC4, VillagerType.DESERT, 0xD9B45A, VillagerType.SNOW, 0xE8EEF2,
         VillagerType.TAIGA, 0x2F5A3A, VillagerType.SAVANNA, 0xC2632B, VillagerType.JUNGLE, 0x4E9A2E,
         VillagerType.SWAMP, 0x5B5A3A);
@@ -30,41 +30,41 @@ public final class Origin {
     }
 
     /** Le biome où se trouve le joueur, ramené à l'un des sept types de villages. */
-    public static RegistryKey<VillagerType> at(ServerPlayerEntity player) {
-        return VillagerType.forBiome(player.getEntityWorld().getBiome(player.getBlockPos()));
+    public static ResourceKey<VillagerType> at(ServerPlayer player) {
+        return VillagerType.byBiome(player.level().getBiome(player.blockPosition()));
     }
 
     /** « du désert », « des plaines »… */
-    public static String from(RegistryKey<VillagerType> type) {
+    public static String from(ResourceKey<VillagerType> type) {
         return NAMES.getOrDefault(type, UNKNOWN)[0];
     }
 
-    public static String label(RegistryKey<VillagerType> type) {
+    public static String label(ResourceKey<VillagerType> type) {
         return NAMES.getOrDefault(type, UNKNOWN)[1];
     }
 
     /** « dans ton désert », « dans tes plaines »… */
-    public static String home(RegistryKey<VillagerType> type) {
+    public static String home(ResourceKey<VillagerType> type) {
         return NAMES.getOrDefault(type, UNKNOWN)[2];
     }
 
-    public static int color(RegistryKey<VillagerType> type) {
+    public static int color(ResourceKey<VillagerType> type) {
         return COLORS.getOrDefault(type, 0x777777);
     }
 
-    public static String id(RegistryKey<VillagerType> type) {
-        return type.getValue().toString();
+    public static String id(ResourceKey<VillagerType> type) {
+        return type.identifier().toString();
     }
 
     /** Null si ce n'est pas l'un des sept types de villages. */
-    public static RegistryKey<VillagerType> byId(String id) {
+    public static ResourceKey<VillagerType> byId(String id) {
         Identifier identifier = Identifier.tryParse(id);
         if (identifier == null) return null;
-        RegistryKey<VillagerType> key = RegistryKey.of(RegistryKeys.VILLAGER_TYPE, identifier);
+        ResourceKey<VillagerType> key = ResourceKey.create(Registries.VILLAGER_TYPE, identifier);
         return NAMES.containsKey(key) ? key : null;
     }
 
-    public static Iterable<RegistryKey<VillagerType>> all() {
+    public static Iterable<ResourceKey<VillagerType>> all() {
         return NAMES.keySet();
     }
 }
