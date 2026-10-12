@@ -1,11 +1,9 @@
 package fr.luuuccasss.discrimination;
 
 import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.ArmorMaterials;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Formatting;
 
@@ -37,7 +35,7 @@ public enum SocialClass {
         int score = 0;
         for (EquipmentSlot slot : new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
             ItemStack stack = player.getEquippedStack(slot);
-            if (stack.getItem() instanceof ArmorItem armor) score += armorValue(armor.getMaterial());
+            if (!stack.isEmpty()) score += armorValue(Registries.ITEM.getId(stack.getItem()).getPath());
         }
         int emeralds = 0;
         for (int i = 0; i < player.getInventory().size(); i++) {
@@ -48,11 +46,12 @@ public enum SocialClass {
         return score + emeralds / 16;
     }
 
-    private static int armorValue(RegistryEntry<net.minecraft.item.ArmorMaterial> material) {
-        if (material.equals(ArmorMaterials.NETHERITE)) return 10;
-        if (material.equals(ArmorMaterials.DIAMOND)) return 6;
-        if (material.equals(ArmorMaterials.IRON) || material.equals(ArmorMaterials.GOLD)) return 3;
-        if (material.equals(ArmorMaterials.CHAIN)) return 2;
+    /** D'après le nom de la pièce : netherite_chestplate, diamond_helmet… */
+    private static int armorValue(String id) {
+        if (id.startsWith("netherite_")) return 10;
+        if (id.startsWith("diamond_")) return 6;
+        if (id.startsWith("iron_") || id.startsWith("golden_")) return 3;
+        if (id.startsWith("chainmail_")) return 2;
         return 1;
     }
 }
