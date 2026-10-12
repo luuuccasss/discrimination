@@ -1,22 +1,24 @@
 package fr.luuuccasss.discrimination;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import net.minecraft.entity.ai.brain.EntityLookTarget;
-import net.minecraft.entity.ai.brain.MemoryModuleType;
-import net.minecraft.entity.passive.IronGolemEntity;
-import net.minecraft.entity.passive.VillagerEntity;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.village.VillagerType;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.ai.behavior.EntityTracker;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.animal.golem.IronGolem;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.npc.villager.VillagerType;
 
 /** Ce qui se passe quand un joueur traverse un village : regards, messes basses, et le golem qui le suit. */
 public final class Gossip {
@@ -40,65 +42,71 @@ public final class Gossip {
     }
 
     /** Appelé toutes les 10 ticks pour chaque joueur. */
-    public static void tick(ServerWorld world, ServerPlayerEntity player) {
+    public static void tick(ServerLevel level, ServerPlayer player) {
         if (player.isSpectator() || player.isInvisible()) return;
-        List<VillagerEntity> villagers = world.getEntitiesByClass(VillagerEntity.class, player.getBoundingBox().expand(VILLAGER_RADIUS),
-            v -> v.isAlive() && !v.isBaby() && !v.isSleeping() && !v.hasCustomer());
-        Random random = world.random;
-        for (VillagerEntity villager : villagers) {
+        List<Villager> villagers = level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(VILLAGER_RADIUS),
+            v -> v.isAlive() && !v.isBaby() && !v.isSleeping() && !v.isTrading());
+        RandomSource random = level.getRandom();
+        for (Villager villager : villagers) {
             Prejudice.Verdict verdict = Opinion.of(villager, player);
             if (verdict.hostile()) {
-                villager.getBrain().remember(MemoryModuleType.LOOK_TARGET, new EntityLookTarget(player, true), 60);
+                villager.getBrain().setMemoryWithExpiry(MemoryModuleType.LOOK_TARGET, new EntityTracker(player, true), 60);
                 if (random.nextInt(8) == 0) {
-                    world.spawnParticles(ParticleTypes.ANGRY_VILLAGER, villager.getX(), villager.getEyeY() + 0.4, villager.getZ(), 1, 0, 0, 0, 0);
+                    level.sendParticles(ParticleTypes.ANGRY_VILLAGER, villager.getX(), villager.getEyeY() + 0.4, villager.getZ(), 1, 0, 0, 0, 0);
                 }
-                if (random.nextInt(6) == 0) comment(world, player, villager);
+                if (random.nextInt(6) == 0) comment(level, player, villager);
             } else if (verdict.malus() < 0 && random.nextInt(10) == 0) {
-                world.spawnParticles(ParticleTypes.HAPPY_VILLAGER, villager.getX(), villager.getEyeY() + 0.4, villager.getZ(), 3, 0.3, 0.2, 0.3, 0);
+                level.sendParticles(ParticleTypes.HAPPY_VILLAGER, villager.getX(), villager.getEyeY() + 0.4, villager.getZ(), 3, 0.3, 0.2, 0.3, 0);
             }
         }
-        golemCheck(world, player);
+        golemCheck(level, player);
     }
 
-    private static void comment(ServerWorld world, ServerPlayerEntity player, VillagerEntity villager) {
-        long now = world.getTime();
-        Long last = LAST_COMMENT.get(player.getUuid());
+    private static void comment(ServerLevel level, ServerPlayer player, Villager villager) {
+        long now = level.getGameTime();
+        Long last = LAST_COMMENT.get(player.getUUID());
         if (last != null && now - last < COMMENT_DELAY) return;
         String[] lines = MUTTERINGS.get(Opinion.prejudice(villager));
         if (lines == null) return;
-        LAST_COMMENT.put(player.getUuid(), now);
-        world.playSound(null, villager.getBlockPos(), SoundEvents.ENTITY_VILLAGER_AMBIENT, SoundCategory.NEUTRAL, 1f, 0.8f);
-        player.sendMessage(Text.literal(lines[world.random.nextInt(lines.length)]).formatted(Formatting.GRAY, Formatting.ITALIC), true);
+        LAST_COMMENT.put(player.getUUID(), now);
+        level.playSound(null, villager.blockPosition(), SoundEvents.VILLAGER_AMBIENT, SoundSource.NEUTRAL, 1f, 0.8f);
+        player.sendSystemMessage(Component.literal(lines[level.getRandom().nextInt(lines.length)])
+            .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC), true);
+    }
+
+    /** Le villageois adulte le plus proche, ou null. */
+    public static Villager closestVillager(ServerLevel level, ServerPlayer player, double radius) {
+        return level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(radius), v -> v.isAlive() && !v.isBaby())
+            .stream().min(Comparator.comparingDouble(v -> v.distanceToSqr(player))).orElse(null);
     }
 
     /**
      * Les golems d'un village suivent de près les étrangers à ce village, comme pour un contrôle d'identité.
      * Les joueurs qui y sont habitués (assez d'échanges avec les villageois) sont laissés tranquilles.
      */
-    private static void golemCheck(ServerWorld world, ServerPlayerEntity player) {
-        VillagerType origin = ((Profiled) player).discrimination$getOrigin();
+    private static void golemCheck(ServerLevel level, ServerPlayer player) {
+        ResourceKey<VillagerType> origin = ((Profiled) player).discrimination$getOrigin();
         if (origin == null) return;
-        VillagerEntity local = world.getClosestEntity(VillagerEntity.class, net.minecraft.entity.ai.TargetPredicate.DEFAULT, player,
-            player.getX(), player.getY(), player.getZ(), player.getBoundingBox().expand(32));
-        if (local == null || local.getVillagerData().getType() == origin) return;
-        if (((Prejudiced) local).discrimination$getFamiliarity(player.getUuid()) >= Opinion.ACCEPTED_AT) return;
-        for (IronGolemEntity golem : world.getEntitiesByClass(IronGolemEntity.class, player.getBoundingBox().expand(GOLEM_RADIUS),
+        Villager local = closestVillager(level, player, 32);
+        if (local == null || origin.equals(local.getVillagerData().type().unwrapKey().orElse(null))) return;
+        if (((Prejudiced) local).discrimination$getFamiliarity(player.getUUID()) >= Opinion.ACCEPTED_AT) return;
+        for (IronGolem golem : level.getEntitiesOfClass(IronGolem.class, player.getBoundingBox().inflate(GOLEM_RADIUS),
             g -> g.isAlive() && !g.isPlayerCreated() && g.getTarget() == null)) {
-            golem.getLookControl().lookAt(player);
-            if (golem.squaredDistanceTo(player) > 9) golem.getNavigation().startMovingTo(player, 0.7);
+            golem.getLookControl().setLookAt(player);
+            if (golem.distanceToSqr(player) > 9) golem.getNavigation().moveTo(player, 0.7);
             else golem.getNavigation().stop();
-            long now = world.getTime();
-            Long last = LAST_GOLEM.get(player.getUuid());
+            long now = level.getGameTime();
+            Long last = LAST_GOLEM.get(player.getUUID());
             if (last == null || now - last > GOLEM_MESSAGE_DELAY) {
-                LAST_GOLEM.put(player.getUuid(), now);
-                player.sendMessage(Text.literal("Le golem du village te suit de près. Contrôle d'identité.")
-                    .formatted(Formatting.GRAY, Formatting.ITALIC), false);
+                LAST_GOLEM.put(player.getUUID(), now);
+                player.sendSystemMessage(Component.literal("Le golem du village te suit de près. Contrôle d'identité.")
+                    .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
             }
         }
     }
 
-    public static void forget(ServerPlayerEntity player) {
-        LAST_COMMENT.remove(player.getUuid());
-        LAST_GOLEM.remove(player.getUuid());
+    public static void forget(ServerPlayer player) {
+        LAST_COMMENT.remove(player.getUUID());
+        LAST_GOLEM.remove(player.getUUID());
     }
 }

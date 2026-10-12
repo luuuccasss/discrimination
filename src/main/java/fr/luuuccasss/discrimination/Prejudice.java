@@ -1,31 +1,32 @@
 package fr.luuuccasss.discrimination;
 
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.village.VillagerType;
+import net.minecraft.ChatFormatting;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.npc.villager.VillagerType;
 
 /** Le préjugé d'un villageois, tiré au hasard à sa première rencontre avec un joueur et gardé pour toujours. */
 public enum Prejudice {
     /** Méprise les pauvres, déroule le tapis rouge aux riches. */
-    SNOB("snob", Formatting.LIGHT_PURPLE, 25),
+    SNOB("snob", ChatFormatting.LIGHT_PURPLE, 25),
     /** Déteste les riches. */
-    ENVIEUX("envieux", Formatting.GREEN, 20),
+    ENVIEUX("envieux", ChatFormatting.GREEN, 20),
     /** Se méfie de tout ce qui ne vient pas de son biome. */
-    CHAUVIN("chauvin", Formatting.BLUE, 35),
+    CHAUVIN("chauvin", ChatFormatting.BLUE, 35),
     /** Aucun préjugé. */
-    TOLERANT("tolérant", Formatting.WHITE, 20);
+    TOLERANT("tolérant", ChatFormatting.WHITE, 20);
 
     public final String label;
-    public final Formatting color;
+    public final ChatFormatting color;
     private final int weight;
 
-    Prejudice(String label, Formatting color, int weight) {
+    Prejudice(String label, ChatFormatting color, int weight) {
         this.label = label;
         this.color = color;
         this.weight = weight;
     }
 
-    public static Prejudice roll(Random random) {
+    public static Prejudice roll(RandomSource random) {
         int total = 0;
         for (Prejudice p : values()) total += p.weight;
         int n = random.nextInt(total);
@@ -42,7 +43,7 @@ public enum Prejudice {
      * @param villagerType le biome du villageois
      * @param origin       le biome d'origine du joueur
      */
-    public Verdict judge(SocialClass socialClass, VillagerType villagerType, VillagerType origin) {
+    public Verdict judge(SocialClass socialClass, ResourceKey<VillagerType> villagerType, ResourceKey<VillagerType> origin) {
         boolean foreigner = origin != null && origin != villagerType;
         return switch (this) {
             case SNOB -> switch (socialClass) {
