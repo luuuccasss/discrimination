@@ -16,19 +16,19 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRendererContext;
 import net.minecraft.client.render.entity.model.VillagerResemblingModel;
+import net.minecraft.client.render.entity.state.VillagerEntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.util.Identifier;
 
 /** Les préjugés se voient : haut-de-forme et monocle pour les snobs, béret aux couleurs de leur région pour les chauvins. */
-public class AccessoriesFeatureRenderer extends FeatureRenderer<VillagerEntity, VillagerResemblingModel<VillagerEntity>> {
+public class AccessoriesFeatureRenderer extends FeatureRenderer<VillagerEntityRenderState, VillagerResemblingModel> {
     private static final Identifier TEXTURE = Identifier.of(Discrimination.MOD_ID, "textures/entity/accessoires.png");
 
     private final ModelPart monocle;
     private final ModelPart topHat;
     private final ModelPart beret;
 
-    public AccessoriesFeatureRenderer(FeatureRendererContext<VillagerEntity, VillagerResemblingModel<VillagerEntity>> context) {
+    public AccessoriesFeatureRenderer(FeatureRendererContext<VillagerEntityRenderState, VillagerResemblingModel> context) {
         super(context);
         ModelData data = new ModelData();
         ModelPartData root = data.getRoot();
@@ -48,10 +48,10 @@ public class AccessoriesFeatureRenderer extends FeatureRenderer<VillagerEntity, 
     }
 
     @Override
-    public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, VillagerEntity entity,
-                       float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
-        if (entity.isInvisible() || entity.isBaby()) return;
-        Prejudice prejudice = PrejudiceCache.get(entity.getId());
+    public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, VillagerEntityRenderState state,
+                       float limbAngle, float limbDistance) {
+        if (state.invisible || state.baby) return;
+        Prejudice prejudice = ((AccessoryRenderState) state).discrimination$getPrejudice();
         if (prejudice != Prejudice.SNOB && prejudice != Prejudice.CHAUVIN) return;
         VertexConsumer consumer = vertexConsumers.getBuffer(RenderLayer.getEntityCutoutNoCull(TEXTURE));
         int overlay = OverlayTexture.DEFAULT_UV;
@@ -62,7 +62,7 @@ public class AccessoriesFeatureRenderer extends FeatureRenderer<VillagerEntity, 
             monocle.render(matrices, consumer, light, overlay);
             topHat.render(matrices, consumer, light, overlay);
         } else {
-            beret.render(matrices, consumer, light, overlay, 0xFF000000 | Origin.color(entity.getVillagerData().getType()));
+            beret.render(matrices, consumer, light, overlay, 0xFF000000 | Origin.color(state.villagerData.getType()));
         }
         matrices.pop();
     }
