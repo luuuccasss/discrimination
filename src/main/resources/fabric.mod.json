@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "discrimination",
+  "version": "${version}",
+  "name": "Discrimination",
+  "description": "Les villageois ont leurs préjugés : ils jugent les joueurs sur leur armure, leur biome d'origine et leur richesse, changent leurs prix et refusent certains échanges.",
+  "authors": ["luuuccasss"],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["fr.luuuccasss.discrimination.Discrimination"],
+    "client": ["fr.luuuccasss.discrimination.client.DiscriminationClient"]
+  },
+  "mixins": ["discrimination.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": ">=1.21 <1.21.2",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
