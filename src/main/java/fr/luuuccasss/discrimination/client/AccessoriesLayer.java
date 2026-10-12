@@ -62,7 +62,7 @@ public class AccessoriesLayer extends RenderLayer<VillagerRenderState, VillagerM
             collector.submitModelPart(topHat, poseStack, type, light, overlay, null);
         } else {
             int color = 0xFF000000 | Origin.color(state.villagerData.type().unwrapKey().orElse(null));
-            collector.submitModelPart(beret, poseStack, type, light, overlay, null, color, null);
+            collector.submitModelPart(beret, poseStack, type, light, overlay, null, color);
         }
         poseStack.popPose();
     }
