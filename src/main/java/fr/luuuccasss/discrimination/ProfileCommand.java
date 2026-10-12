@@ -60,7 +60,7 @@ public final class ProfileCommand {
             .append(Text.literal(origin == null ? "pas encore recensé" : Origin.label(origin)).formatted(Formatting.WHITE))
             .append(Text.literal("\n  Classe sociale : ").formatted(Formatting.GRAY))
             .append(Text.literal(socialClass.label + " (" + SocialClass.wealth(player) + " pts)").formatted(socialClass.color));
-        VillagerEntity villager = player.getServerWorld().getClosestEntity(VillagerEntity.class, TargetPredicate.DEFAULT, player,
+        VillagerEntity villager = player.getWorld().getClosestEntity(VillagerEntity.class, TargetPredicate.DEFAULT, player,
             player.getX(), player.getY(), player.getZ(), player.getBoundingBox().expand(16));
         if (villager != null && !villager.isBaby()) {
             Prejudice prejudice = Opinion.prejudice(villager);

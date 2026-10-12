@@ -31,7 +31,7 @@ public final class Origin {
 
     /** Le biome où se trouve le joueur, ramené à l'un des sept types de villages. */
     public static RegistryKey<VillagerType> at(ServerPlayerEntity player) {
-        return VillagerType.forBiome(player.getServerWorld().getBiome(player.getBlockPos()));
+        return VillagerType.forBiome(player.getWorld().getBiome(player.getBlockPos()));
     }
 
     /** « du désert », « des plaines »… */
