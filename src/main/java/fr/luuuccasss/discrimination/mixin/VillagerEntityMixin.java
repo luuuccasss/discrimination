@@ -68,14 +68,14 @@ public abstract class VillagerEntityMixin implements Prejudiced {
     @Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
     private void discrimination$read(NbtCompound nbt, CallbackInfo ci) {
         try {
-            if (nbt.contains("DiscriminationPrejudice")) discrimination$prejudice = Prejudice.valueOf(nbt.getString("DiscriminationPrejudice"));
+            nbt.getString("DiscriminationPrejudice").ifPresent(name -> discrimination$prejudice = Prejudice.valueOf(name));
         } catch (IllegalArgumentException ignored) {
             discrimination$prejudice = null;
         }
-        NbtCompound familiarity = nbt.getCompound("DiscriminationFamiliarity");
+        NbtCompound familiarity = nbt.getCompoundOrEmpty("DiscriminationFamiliarity");
         for (String key : familiarity.getKeys()) {
             try {
-                discrimination$familiarity.put(UUID.fromString(key), familiarity.getInt(key));
+                discrimination$familiarity.put(UUID.fromString(key), familiarity.getInt(key, 0));
             } catch (IllegalArgumentException ignored) {
                 // clé invalide, on l'oublie
             }

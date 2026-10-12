@@ -3,6 +3,7 @@ package fr.luuuccasss.discrimination.mixin;
 import fr.luuuccasss.discrimination.Origin;
 import fr.luuuccasss.discrimination.Profiled;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.village.VillagerType;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,15 +14,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin implements Profiled {
-    @Unique private VillagerType discrimination$origin;
+    @Unique private RegistryKey<VillagerType> discrimination$origin;
 
     @Override
-    public VillagerType discrimination$getOrigin() {
+    public RegistryKey<VillagerType> discrimination$getOrigin() {
         return discrimination$origin;
     }
 
     @Override
-    public void discrimination$setOrigin(VillagerType origin) {
+    public void discrimination$setOrigin(RegistryKey<VillagerType> origin) {
         discrimination$origin = origin;
     }
 
@@ -32,7 +33,7 @@ public abstract class ServerPlayerEntityMixin implements Profiled {
 
     @Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
     private void discrimination$read(NbtCompound nbt, CallbackInfo ci) {
-        if (nbt.contains("DiscriminationOrigin")) discrimination$origin = Origin.byId(nbt.getString("DiscriminationOrigin"));
+        nbt.getString("DiscriminationOrigin").ifPresent(id -> discrimination$origin = Origin.byId(id));
     }
 
     @Inject(method = "copyFrom", at = @At("TAIL"))
