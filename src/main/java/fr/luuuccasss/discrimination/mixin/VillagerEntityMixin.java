@@ -3,18 +3,20 @@ package fr.luuuccasss.discrimination.mixin;
 import fr.luuuccasss.discrimination.Opinion;
 import fr.luuuccasss.discrimination.Prejudice;
 import fr.luuuccasss.discrimination.Prejudiced;
+import com.mojang.serialization.Codec;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -57,29 +59,31 @@ public abstract class VillagerEntityMixin implements Prejudiced {
         discrimination$familiarity.put(player, Math.max(0, Math.min(value, Opinion.ACCEPTED_AT)));
     }
 
-    @Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))
-    private void discrimination$write(NbtCompound nbt, CallbackInfo ci) {
-        if (discrimination$prejudice != null) nbt.putString("DiscriminationPrejudice", discrimination$prejudice.name());
-        NbtCompound familiarity = new NbtCompound();
-        discrimination$familiarity.forEach((uuid, value) -> familiarity.putInt(uuid.toString(), value));
-        nbt.put("DiscriminationFamiliarity", familiarity);
+    /** Habitude par joueur, clé = UUID en texte. */
+    @Unique private static final Codec<Map<String, Integer>> FAMILIARITY_CODEC = Codec.unboundedMap(Codec.STRING, Codec.INT);
+
+    @Inject(method = "writeCustomData", at = @At("TAIL"))
+    private void discrimination$write(WriteView view, CallbackInfo ci) {
+        if (discrimination$prejudice != null) view.putString("DiscriminationPrejudice", discrimination$prejudice.name());
+        Map<String, Integer> familiarity = new HashMap<>();
+        discrimination$familiarity.forEach((uuid, value) -> familiarity.put(uuid.toString(), value));
+        view.put("DiscriminationFamiliarity", FAMILIARITY_CODEC, familiarity);
     }
 
-    @Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
-    private void discrimination$read(NbtCompound nbt, CallbackInfo ci) {
+    @Inject(method = "readCustomData", at = @At("TAIL"))
+    private void discrimination$read(ReadView view, CallbackInfo ci) {
         try {
-            nbt.getString("DiscriminationPrejudice").ifPresent(name -> discrimination$prejudice = Prejudice.valueOf(name));
+            view.getOptionalString("DiscriminationPrejudice").ifPresent(name -> discrimination$prejudice = Prejudice.valueOf(name));
         } catch (IllegalArgumentException ignored) {
             discrimination$prejudice = null;
         }
-        NbtCompound familiarity = nbt.getCompoundOrEmpty("DiscriminationFamiliarity");
-        for (String key : familiarity.getKeys()) {
+        view.read("DiscriminationFamiliarity", FAMILIARITY_CODEC).ifPresent(familiarity -> familiarity.forEach((key, value) -> {
             try {
-                discrimination$familiarity.put(UUID.fromString(key), familiarity.getInt(key, 0));
+                discrimination$familiarity.put(UUID.fromString(key), value);
             } catch (IllegalArgumentException ignored) {
                 // clé invalide, on l'oublie
             }
-        }
+        }));
     }
 
     /**

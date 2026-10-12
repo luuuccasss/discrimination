@@ -2,9 +2,10 @@ package fr.luuuccasss.discrimination.mixin;
 
 import fr.luuuccasss.discrimination.Origin;
 import fr.luuuccasss.discrimination.Profiled;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.village.VillagerType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -26,14 +27,14 @@ public abstract class ServerPlayerEntityMixin implements Profiled {
         discrimination$origin = origin;
     }
 
-    @Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))
-    private void discrimination$write(NbtCompound nbt, CallbackInfo ci) {
-        if (discrimination$origin != null) nbt.putString("DiscriminationOrigin", Origin.id(discrimination$origin));
+    @Inject(method = "writeCustomData", at = @At("TAIL"))
+    private void discrimination$write(WriteView view, CallbackInfo ci) {
+        if (discrimination$origin != null) view.putString("DiscriminationOrigin", Origin.id(discrimination$origin));
     }
 
-    @Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
-    private void discrimination$read(NbtCompound nbt, CallbackInfo ci) {
-        nbt.getString("DiscriminationOrigin").ifPresent(id -> discrimination$origin = Origin.byId(id));
+    @Inject(method = "readCustomData", at = @At("TAIL"))
+    private void discrimination$read(ReadView view, CallbackInfo ci) {
+        view.getOptionalString("DiscriminationOrigin").ifPresent(id -> discrimination$origin = Origin.byId(id));
     }
 
     @Inject(method = "copyFrom", at = @At("TAIL"))
