@@ -22,7 +22,7 @@ import net.minecraft.util.Identifier;
 
 /** Les préjugés se voient : haut-de-forme et monocle pour les snobs, béret aux couleurs de leur région pour les chauvins. */
 public class AccessoriesFeatureRenderer extends FeatureRenderer<VillagerEntity, VillagerResemblingModel<VillagerEntity>> {
-    private static final Identifier TEXTURE = Identifier.of(Discrimination.MOD_ID, "textures/entity/accessoires.png");
+    private static final Identifier TEXTURE = new Identifier(Discrimination.MOD_ID, "textures/entity/accessoires.png");
 
     private final ModelPart monocle;
     private final ModelPart topHat;
@@ -62,7 +62,9 @@ public class AccessoriesFeatureRenderer extends FeatureRenderer<VillagerEntity, 
             monocle.render(matrices, consumer, light, overlay);
             topHat.render(matrices, consumer, light, overlay);
         } else {
-            beret.render(matrices, consumer, light, overlay, 0xFF000000 | Origin.color(entity.getVillagerData().getType()));
+            int color = Origin.color(entity.getVillagerData().getType());
+            beret.render(matrices, consumer, light, overlay,
+                ((color >> 16) & 0xFF) / 255f, ((color >> 8) & 0xFF) / 255f, (color & 0xFF) / 255f, 1f);
         }
         matrices.pop();
     }
