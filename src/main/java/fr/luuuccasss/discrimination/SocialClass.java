@@ -5,7 +5,6 @@ import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ArmorMaterials;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Formatting;
 
@@ -48,11 +47,11 @@ public enum SocialClass {
         return score + emeralds / 16;
     }
 
-    private static int armorValue(RegistryEntry<net.minecraft.item.ArmorMaterial> material) {
-        if (material.equals(ArmorMaterials.NETHERITE)) return 10;
-        if (material.equals(ArmorMaterials.DIAMOND)) return 6;
-        if (material.equals(ArmorMaterials.IRON) || material.equals(ArmorMaterials.GOLD)) return 3;
-        if (material.equals(ArmorMaterials.CHAIN)) return 2;
+    private static int armorValue(net.minecraft.item.ArmorMaterial material) {
+        if (material == ArmorMaterials.NETHERITE) return 10;
+        if (material == ArmorMaterials.DIAMOND) return 6;
+        if (material == ArmorMaterials.IRON || material == ArmorMaterials.GOLD) return 3;
+        if (material == ArmorMaterials.CHAIN) return 2;
         return 1;
     }
 }
