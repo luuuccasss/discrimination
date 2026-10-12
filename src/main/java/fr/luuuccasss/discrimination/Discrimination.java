@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.passive.VillagerEntity;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -39,7 +40,7 @@ public class Discrimination implements ModInitializer {
     private static void census(ServerPlayerEntity player) {
         Profiled profile = (Profiled) player;
         if (profile.discrimination$getOrigin() != null) return;
-        VillagerType origin = Origin.at(player);
+        RegistryKey<VillagerType> origin = Origin.at(player);
         profile.discrimination$setOrigin(origin);
         player.sendMessage(Text.literal("Recensement : tu es officiellement originaire " + Origin.from(origin)
             + ". Les villageois des autres régions s'en souviendront.").formatted(Formatting.GRAY), false);

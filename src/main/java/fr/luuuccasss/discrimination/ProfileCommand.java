@@ -1,19 +1,19 @@
 package fr.luuuccasss.discrimination;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
-
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.ai.TargetPredicate;
 import net.minecraft.entity.passive.VillagerEntity;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.village.VillagerType;
+import static net.minecraft.server.command.CommandManager.argument;
+import static net.minecraft.server.command.CommandManager.literal;
 
 /**
  * /profil                               ton origine, ta classe sociale et l'avis du villageois le plus proche
@@ -35,12 +35,12 @@ public final class ProfileCommand {
                 .then(argument("joueur", EntityArgumentType.player())
                     .then(argument("biome", StringArgumentType.word())
                         .suggests((ctx, builder) -> {
-                            for (VillagerType type : Origin.all()) builder.suggest(Origin.id(type).replace("minecraft:", ""));
+                            for (RegistryKey<VillagerType> type : Origin.all()) builder.suggest(Origin.id(type).replace("minecraft:", ""));
                             return builder.buildFuture();
                         })
                         .executes(ctx -> {
                             String id = StringArgumentType.getString(ctx, "biome");
-                            VillagerType type = Origin.byId(id.contains(":") ? id : "minecraft:" + id);
+                            RegistryKey<VillagerType> type = Origin.byId(id.contains(":") ? id : "minecraft:" + id);
                             if (type == null) {
                                 ctx.getSource().sendError(Text.literal("Biome inconnu : " + id));
                                 return 0;
@@ -52,7 +52,7 @@ public final class ProfileCommand {
     }
 
     private static int show(ServerCommandSource source, ServerPlayerEntity player) {
-        VillagerType origin = ((Profiled) player).discrimination$getOrigin();
+        RegistryKey<VillagerType> origin = ((Profiled) player).discrimination$getOrigin();
         SocialClass socialClass = SocialClass.of(player);
         MutableText text = Text.literal("Profil de ").formatted(Formatting.GRAY)
             .append(player.getDisplayName())
@@ -68,7 +68,7 @@ public final class ProfileCommand {
             int familiarity = ((Prejudiced) villager).discrimination$getFamiliarity(player.getUuid());
             text.append(Text.literal("\n  Villageois le plus proche : ").formatted(Formatting.GRAY))
                 .append(Text.literal(prejudice.label).formatted(prejudice.color))
-                .append(Text.literal(", " + Origin.from(villager.getVillagerData().getType())).formatted(Formatting.GRAY))
+                .append(Text.literal(", " + Origin.from(villager.getVillagerData().type().getKey().orElse(null))).formatted(Formatting.GRAY))
                 .append(Text.literal("\n    → ").formatted(Formatting.GRAY))
                 .append(describe(verdict))
                 .append(Text.literal("  (habitude " + familiarity + "/" + Opinion.ACCEPTED_AT + ")").formatted(Formatting.DARK_GRAY));

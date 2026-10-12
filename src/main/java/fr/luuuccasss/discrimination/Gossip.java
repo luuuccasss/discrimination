@@ -9,6 +9,7 @@ import net.minecraft.entity.ai.brain.MemoryModuleType;
 import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -76,11 +77,11 @@ public final class Gossip {
      * Les joueurs qui y sont habitués (assez d'échanges avec les villageois) sont laissés tranquilles.
      */
     private static void golemCheck(ServerWorld world, ServerPlayerEntity player) {
-        VillagerType origin = ((Profiled) player).discrimination$getOrigin();
+        RegistryKey<VillagerType> origin = ((Profiled) player).discrimination$getOrigin();
         if (origin == null) return;
         VillagerEntity local = world.getClosestEntity(VillagerEntity.class, net.minecraft.entity.ai.TargetPredicate.DEFAULT, player,
             player.getX(), player.getY(), player.getZ(), player.getBoundingBox().expand(32));
-        if (local == null || local.getVillagerData().getType() == origin) return;
+        if (local == null || local.getVillagerData().type().getKey().orElse(null) == origin) return;
         if (((Prejudiced) local).discrimination$getFamiliarity(player.getUuid()) >= Opinion.ACCEPTED_AT) return;
         for (IronGolemEntity golem : world.getEntitiesByClass(IronGolemEntity.class, player.getBoundingBox().expand(GOLEM_RADIUS),
             g -> g.isAlive() && !g.isPlayerCreated() && g.getTarget() == null)) {

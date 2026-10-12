@@ -1,6 +1,7 @@
 package fr.luuuccasss.discrimination;
 
 import net.minecraft.entity.passive.VillagerEntity;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 /** Ce qu'un villageois pense d'un joueur : son préjugé, adouci par l'habitude. */
@@ -25,7 +26,7 @@ public final class Opinion {
 
     public static Prejudice.Verdict of(VillagerEntity villager, ServerPlayerEntity player) {
         Prejudice prejudice = prejudice(villager);
-        Prejudice.Verdict verdict = prejudice.judge(SocialClass.of(player), villager.getVillagerData().getType(),
+        Prejudice.Verdict verdict = prejudice.judge(SocialClass.of(player), villager.getVillagerData().type().getKey().orElse(null),
             ((Profiled) player).discrimination$getOrigin());
         if (!verdict.hostile()) return verdict;
         int familiarity = ((Prejudiced) villager).discrimination$getFamiliarity(player.getUuid());

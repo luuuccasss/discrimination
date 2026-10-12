@@ -1,5 +1,6 @@
 package fr.luuuccasss.discrimination;
 
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.village.VillagerType;
@@ -42,7 +43,7 @@ public enum Prejudice {
      * @param villagerType le biome du villageois
      * @param origin       le biome d'origine du joueur
      */
-    public Verdict judge(SocialClass socialClass, VillagerType villagerType, VillagerType origin) {
+    public Verdict judge(SocialClass socialClass, RegistryKey<VillagerType> villagerType, RegistryKey<VillagerType> origin) {
         boolean foreigner = origin != null && origin != villagerType;
         return switch (this) {
             case SNOB -> switch (socialClass) {
