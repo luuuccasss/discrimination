@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.ai.TargetPredicate;
 import net.minecraft.entity.passive.VillagerEntity;
+import net.minecraft.server.command.CommandManager;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -28,10 +29,10 @@ public final class ProfileCommand {
         dispatcher.register(literal("profil")
             .executes(ctx -> show(ctx.getSource(), ctx.getSource().getPlayerOrThrow()))
             .then(argument("joueur", EntityArgumentType.player())
-                .requires(source -> source.hasPermissionLevel(2))
+                .requires(CommandManager.requirePermissionLevel(CommandManager.GAMEMASTERS_CHECK))
                 .executes(ctx -> show(ctx.getSource(), EntityArgumentType.getPlayer(ctx, "joueur"))))
             .then(literal("origine")
-                .requires(source -> source.hasPermissionLevel(2))
+                .requires(CommandManager.requirePermissionLevel(CommandManager.GAMEMASTERS_CHECK))
                 .then(argument("joueur", EntityArgumentType.player())
                     .then(argument("biome", StringArgumentType.word())
                         .suggests((ctx, builder) -> {
