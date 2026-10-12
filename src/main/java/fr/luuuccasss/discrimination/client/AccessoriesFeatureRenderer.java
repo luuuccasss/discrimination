@@ -11,8 +11,8 @@ import net.minecraft.client.model.ModelTransform;
 import net.minecraft.client.model.TexturedModelData;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.RenderLayers;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRendererContext;
 import net.minecraft.client.render.entity.model.VillagerResemblingModel;
@@ -49,21 +49,22 @@ public class AccessoriesFeatureRenderer extends FeatureRenderer<VillagerEntityRe
     }
 
     @Override
-    public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, VillagerEntityRenderState state,
+    public void render(MatrixStack matrices, OrderedRenderCommandQueue queue, int light, VillagerEntityRenderState state,
                        float limbAngle, float limbDistance) {
         if (state.invisible || state.baby) return;
         Prejudice prejudice = ((AccessoryRenderState) state).discrimination$getPrejudice();
         if (prejudice != Prejudice.SNOB && prejudice != Prejudice.CHAUVIN) return;
-        VertexConsumer consumer = vertexConsumers.getBuffer(RenderLayer.getEntityCutoutNoCull(TEXTURE));
+        RenderLayer layer = RenderLayers.entityCutoutNoCull(TEXTURE);
         int overlay = OverlayTexture.DEFAULT_UV;
 
         matrices.push();
         getContextModel().getHead().applyTransform(matrices);
         if (prejudice == Prejudice.SNOB) {
-            monocle.render(matrices, consumer, light, overlay);
-            topHat.render(matrices, consumer, light, overlay);
+            queue.submitModelPart(monocle, matrices, layer, light, overlay, null);
+            queue.submitModelPart(topHat, matrices, layer, light, overlay, null);
         } else {
-            beret.render(matrices, consumer, light, overlay, 0xFF000000 | Origin.color(state.villagerData.type().getKey().orElse(null)));
+            int color = 0xFF000000 | Origin.color(state.villagerData.type().getKey().orElse(null));
+            queue.submitModelPart(beret, matrices, layer, light, overlay, null, color, null);
         }
         matrices.pop();
     }
