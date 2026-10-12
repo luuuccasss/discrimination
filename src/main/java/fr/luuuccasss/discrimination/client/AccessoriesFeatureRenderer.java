@@ -18,6 +18,7 @@ import net.minecraft.client.render.entity.feature.FeatureRendererContext;
 import net.minecraft.client.render.entity.model.VillagerResemblingModel;
 import net.minecraft.client.render.entity.state.VillagerEntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
 
 /** Les préjugés se voient : haut-de-forme et monocle pour les snobs, béret aux couleurs de leur région pour les chauvins. */
@@ -57,12 +58,12 @@ public class AccessoriesFeatureRenderer extends FeatureRenderer<VillagerEntityRe
         int overlay = OverlayTexture.DEFAULT_UV;
 
         matrices.push();
-        getContextModel().getHead().rotate(matrices);
+        getContextModel().getHead().applyTransform(matrices);
         if (prejudice == Prejudice.SNOB) {
             monocle.render(matrices, consumer, light, overlay);
             topHat.render(matrices, consumer, light, overlay);
         } else {
-            beret.render(matrices, consumer, light, overlay, 0xFF000000 | Origin.color(state.villagerData.getType()));
+            beret.render(matrices, consumer, light, overlay, 0xFF000000 | Origin.color(state.villagerData.type().getKey().orElse(null)));
         }
         matrices.pop();
     }
