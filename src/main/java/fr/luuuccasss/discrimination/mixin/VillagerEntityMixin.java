@@ -95,7 +95,7 @@ public abstract class VillagerEntityMixin implements Prejudiced {
         if (!(player instanceof ServerPlayerEntity serverPlayer) || player.isSpectator()) return;
         VillagerEntity self = (VillagerEntity) (Object) this;
         if (self.isBaby() || !self.isAlive()) return;
-        ServerWorld world = (ServerWorld) self.getWorld();
+        ServerWorld world = (ServerWorld) self.getEntityWorld();
         ItemStack held = player.getStackInHand(hand);
         if (player.isSneaking() && held.isIn(ItemTags.SMALL_FLOWERS)) {
             int before = discrimination$getFamiliarity(player.getUuid());
