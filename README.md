@@ -1,8 +1,25 @@
 # Discrimination
 
-Mod Fabric pour Minecraft 1.21 – 1.21.1. Les villageois ont leurs **préjugés** : ils te jugent sur ton armure, ta richesse et le biome d'où tu viens, changent leurs prix en fonction, **réservent** leurs meilleurs échanges aux « gens bien » et en **refusent** certains.
+Mod Fabric pour Minecraft. Les villageois ont leurs **préjugés** : ils te jugent sur ton armure, ta richesse et le biome d'où tu viens, changent leurs prix en fonction, **réservent** leurs meilleurs échanges aux « gens bien » et en **refusent** certains.
 
 ![Cinq villageois : un chauvin des plaines, un envieux, un chauvin des neiges, un chauvin du désert et un snob](docs/villageois.png)
+
+## Versions
+
+Un jar par groupe de versions de Minecraft, chacun sur sa branche.
+
+| Minecraft | Branche | Java | Release |
+|---|---|---|---|
+| 26.3 | [`26.3`](https://github.com/luuuccasss/discrimination/tree/26.3) | 25 | [1.0.0+26.3](https://github.com/luuuccasss/discrimination/releases/tag/1.0.0%2B26.3) |
+| 26.1 – 26.2 | [`26.1`](https://github.com/luuuccasss/discrimination/tree/26.1) | 25 | [1.0.0+26.1](https://github.com/luuuccasss/discrimination/releases/tag/1.0.0%2B26.1) |
+| 1.21.11 | [`1.21.11`](https://github.com/luuuccasss/discrimination/tree/1.21.11) | 21 | [1.0.0+1.21.11](https://github.com/luuuccasss/discrimination/releases/tag/1.0.0%2B1.21.11) |
+| 1.21.6 – 1.21.8 | [`1.21.8`](https://github.com/luuuccasss/discrimination/tree/1.21.8) | 21 | [1.0.0+1.21.8](https://github.com/luuuccasss/discrimination/releases/tag/1.0.0%2B1.21.8) |
+| 1.21.5 | [`1.21.5`](https://github.com/luuuccasss/discrimination/tree/1.21.5) | 21 | [1.0.0+1.21.5](https://github.com/luuuccasss/discrimination/releases/tag/1.0.0%2B1.21.5) |
+| 1.21.2 – 1.21.4 | [`1.21.4`](https://github.com/luuuccasss/discrimination/tree/1.21.4) | 21 | [1.0.0+1.21.4](https://github.com/luuuccasss/discrimination/releases/tag/1.0.0%2B1.21.4) |
+| 1.21 – 1.21.1 | [`1.21.1`](https://github.com/luuuccasss/discrimination/tree/1.21.1) | 21 | [1.0.0+1.21.1](https://github.com/luuuccasss/discrimination/releases/tag/1.0.0%2B1.21.1) |
+| 1.20.1 – 1.20.4 | [`1.20.1`](https://github.com/luuuccasss/discrimination/tree/1.20.1) | 17 | [1.0.0+1.20.1](https://github.com/luuuccasss/discrimination/releases/tag/1.0.0%2B1.20.1) |
+
+1.21.9 et 1.21.10 ne sont pas prises en charge.
 
 ## Ce que les villageois voient de toi
 
@@ -44,7 +61,7 @@ Un échange « réservé » coûte une pile entière d'émeraudes. Chaque fois q
 Les préjugés s'effacent avec l'habitude :
 
 - chaque **échange** avec un villageois compte pour 1 ;
-- **accroupi + clic droit avec une fleur**, tu lui offres un cadeau qui compte pour 2.
+- **accroupi + clic droit avec une petite fleur** (coquelicot, pissenlit, tulipe…), tu lui offres un cadeau qui compte pour 2.
 
 À partir de 3, il ne te refuse plus. À 6, il ne te réserve plus rien. À 10, il te traite comme tout le monde : « Finalement, t'es pas si mal. » Les golems laissent tranquilles ceux qui sont acceptés dans le village.
 
@@ -68,8 +85,8 @@ Les envieux et les tolérants n'ont pas d'accessoire. Les envieux sont discrets.
 
 ## Installation
 
-1. Installer [Fabric Loader](https://fabricmc.net/use/) pour Minecraft 1.21 ou 1.21.1.
-2. Mettre [Fabric API](https://modrinth.com/mod/fabric-api) et le jar des [Releases](https://github.com/luuuccasss/discrimination/releases) dans le dossier `mods/`.
+1. Installer [Fabric Loader](https://fabricmc.net/use/) pour ta version de Minecraft.
+2. Mettre [Fabric API](https://modrinth.com/mod/fabric-api) et le jar correspondant à ta version (voir le tableau) dans le dossier `mods/`.
 
 Le mod s'installe **sur le serveur**. Côté joueurs, il est **facultatif** : il ajoute seulement les accessoires 3D. Il marche aussi en solo.
 
