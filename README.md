@@ -44,7 +44,7 @@ Un échange « réservé » coûte une pile entière d'émeraudes. Chaque fois q
 Les préjugés s'effacent avec l'habitude :
 
 - chaque **échange** avec un villageois compte pour 1 ;
-- **accroupi + clic droit avec une fleur**, tu lui offres un cadeau qui compte pour 2.
+- **accroupi + clic droit avec une petite fleur** (coquelicot, pissenlit, tulipe…), tu lui offres un cadeau qui compte pour 2.
 
 À partir de 3, il ne te refuse plus. À 6, il ne te réserve plus rien. À 10, il te traite comme tout le monde : « Finalement, t'es pas si mal. » Les golems laissent tranquilles ceux qui sont acceptés dans le village.
 
@@ -68,8 +68,10 @@ Les envieux et les tolérants n'ont pas d'accessoire. Les envieux sont discrets.
 
 ## Installation
 
-1. Installer [Fabric Loader](https://fabricmc.net/use/) pour Minecraft 1.21 ou 1.21.1.
-2. Mettre [Fabric API](https://modrinth.com/mod/fabric-api) et le jar des [Releases](https://github.com/luuuccasss/discrimination/releases) dans le dossier `mods/`.
+1. Installer [Fabric Loader](https://fabricmc.net/use/) pour Minecraft 1.21 – 1.21.1.
+2. Mettre [Fabric API](https://modrinth.com/mod/fabric-api) et le jar de la [release 1.0.0+1.21.1](https://github.com/luuuccasss/discrimination/releases/tag/1.0.0%2B1.21.1) dans le dossier `mods/` (Java 21 minimum).
+
+Les autres versions de Minecraft sont sur les autres branches : voir la [branche principale](https://github.com/luuuccasss/discrimination).
 
 Le mod s'installe **sur le serveur**. Côté joueurs, il est **facultatif** : il ajoute seulement les accessoires 3D. Il marche aussi en solo.
 
