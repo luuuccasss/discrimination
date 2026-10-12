@@ -4,7 +4,6 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.EntityTrackingEvents;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.passive.VillagerEntity;
@@ -18,7 +17,6 @@ public class Discrimination implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        PayloadTypeRegistry.playS2C().register(PrejudicePayload.ID, PrejudicePayload.CODEC);
         ServerTickEvents.END_WORLD_TICK.register(world -> {
             for (ServerPlayerEntity player : world.getPlayers()) {
                 if ((world.getTime() + player.getId()) % 10 != 0) continue;
@@ -28,7 +26,8 @@ public class Discrimination implements ModInitializer {
         });
         EntityTrackingEvents.START_TRACKING.register((entity, player) -> {
             if (entity instanceof VillagerEntity villager && ServerPlayNetworking.canSend(player, PrejudicePayload.ID)) {
-                ServerPlayNetworking.send(player, new PrejudicePayload(villager.getId(), Opinion.prejudice(villager).ordinal()));
+                ServerPlayNetworking.send(player, PrejudicePayload.ID,
+                    new PrejudicePayload(villager.getId(), Opinion.prejudice(villager).ordinal()).write());
             }
         });
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> Gossip.forget(handler.getPlayer()));
